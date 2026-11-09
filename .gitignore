@@ -10,3 +10,6 @@
 *.log
 .DS_Store
 Thumbs.db
+
+# Local credentials and OAuth secrets
+*.local.php
