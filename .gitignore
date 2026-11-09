@@ -1,2 +1,12 @@
 *.agdai
 **/MAlonzo/**
+
+/config/database.local.php
+/.env
+/storage/logs/*
+/storage/cache/*
+/public/assets/uploads/*
+!/public/assets/uploads/.gitkeep
+*.log
+.DS_Store
+Thumbs.db
