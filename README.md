@@ -20,3 +20,26 @@ The current prototype uses an original SVG placeholder, not downloaded brand pho
 
 ## Next phases
 Authentication and roles; bilingual routing; database-backed catalog; cart and checkout; multi-seller orders; seller center; admin panel; payment verification; commissions and payouts; shipping, returns, reviews; security tests and deployment.
+
+## Registration, login and admin approval (Phase 2 foundation)
+
+1. Import the updated `database/schema.sql` into a new MySQL database. If you imported an older schema already, back it up and apply a reviewed migration; do not blindly re-import over live data.
+2. Copy `config/database.example.php` to `config/database.local.php` and enter the database credentials. This local file is ignored by Git.
+3. Create the first administrator from the project root using CLI only:
+   `php scripts/create-admin.php "Store Admin" admin@example.com "Use-A-Unique-12+Character-Password"`
+   Do not publish the password or commit credentials. Delete the setup script after the first admin is created.
+4. Open `/register`. New customer/seller accounts are created as `pending`; pending users cannot sign in.
+5. Sign in as admin at `/login`, then open `/admin/dashboard`. Approve or reject applications. Approval creates a one-use activation URL valid for 72 hours. The admin dashboard provides a WhatsApp click-to-chat draft; the admin must review and send it manually.
+6. Users activate the account from that link, then sign in with their Gmail or Pakistani mobile number and the password they created.
+
+### Google sign-in setup (optional)
+
+Copy `config/google.example.php` to `config/google.local.php`, set the Google OAuth Client ID, Client Secret and exact HTTPS callback URL `https://YOUR-DOMAIN/google/callback` in Google Cloud Console, and enable the required OAuth consent configuration. PHP cURL must be enabled. Google registration still requires a WhatsApp number and a password before an approval request is created.
+
+### Important deployment notes
+
+- WhatsApp messages are not sent automatically until an approved WhatsApp Business Platform provider/API is configured. The current admin action prepares a wa.me message for manual sending.
+- Use HTTPS in production. Configure the correct domain in the Google OAuth redirect URI.
+- The activation link is shown once after approval; save/send it before leaving the admin screen. Never share it publicly.
+- Configure rate limiting, email/phone verification and production security review before opening public registration at scale. Google sign-in is optional and disabled until credentials are configured.
+- The PHP built-in server is for local development only; production requires a supported PHP 8.1+ host with MySQL, PDO MySQL and cURL.
