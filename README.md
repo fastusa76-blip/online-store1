@@ -32,10 +32,6 @@ Authentication and roles; bilingual routing; database-backed catalog; cart and c
 5. Sign in as admin at `/login`, then open `/admin/dashboard`. Approve or reject applications. Approval creates a one-use activation URL valid for 72 hours. The admin dashboard provides a WhatsApp click-to-chat draft; the admin must review and send it manually.
 6. Users activate the account from that link, then sign in with their Gmail or Pakistani mobile number and the password they created.
 
-### Google sign-in setup (optional)
-
-Copy `config/google.example.php` to `config/google.local.php`, set the Google OAuth Client ID, Client Secret and exact HTTPS callback URL `https://YOUR-DOMAIN/google/callback` in Google Cloud Console, and enable the required OAuth consent configuration. PHP cURL must be enabled. Google registration still requires a WhatsApp number and a password before an approval request is created.
-
 ### Important deployment notes
 
 - WhatsApp messages are not sent automatically until an approved WhatsApp Business Platform provider/API is configured. The current admin action prepares a wa.me message for manual sending.
