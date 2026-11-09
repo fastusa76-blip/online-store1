@@ -5,7 +5,6 @@ CREATE TABLE users(
  name VARCHAR(120) NOT NULL,
  email VARCHAR(190) NOT NULL UNIQUE,
  phone VARCHAR(20) NULL UNIQUE,
- google_sub VARCHAR(100) NULL UNIQUE,
  password_hash VARCHAR(255) NULL,
  status ENUM('pending','approved','active','rejected','suspended') NOT NULL DEFAULT 'pending',
  approved_at DATETIME NULL,
