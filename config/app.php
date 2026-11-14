@@ -1,0 +1,1 @@
+<?php return ['name'=>'Hammad Online Store','default_language'=>'ur','supported_languages'=>['ur','en'],'currency'=>'PKR','currency_symbol'=>'₨','timezone'=>'Asia/Karachi','debug'=>false];

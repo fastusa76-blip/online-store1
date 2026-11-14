@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /account
+Disallow: /ur/account
+Disallow: /en/account
+Disallow: /login
+Disallow: /register
+Disallow: /seller/register
+Disallow: /logout
+Disallow: /activate
+Disallow: /pending
+
+Sitemap: https://hammadonlinestor.xo.je/sitemap.xml
