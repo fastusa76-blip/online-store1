@@ -62,7 +62,15 @@ return [
 
 **کبھی بھی** `create-admin.php` کو browser سے چلانے کے لیے اس کی CLI protection نہ ہٹائیں، اور نہ ہی کوئی مستقل public admin-creation URL کھلا چھوڑیں۔
 
-## 7) ابتدائی محفوظ ٹیسٹ
+## 7) Login، Dashboard اور 24 گھنٹے کا سیشن
+
+- صارف `/register` سے رجسٹریشن کرے گا؛ نئی درخواست Admin کی منظوری تک pending رہے گی۔
+- منظوری اور activation کے بعد صارف `/login` سے Email یا پاکستانی موبائل نمبر اور Password کے ذریعے داخل ہوگا۔
+- Customer Dashboard: `/ur/account`۔ Admin Control Panel: `/admin/dashboard`۔
+- Login سیشن زیادہ سے زیادہ 24 گھنٹے چلے گا؛ 24 گھنٹے کی غیر فعالیت پر بھی ختم ہوگا۔ Logout بٹن فوراً سیشن ختم کرتا ہے۔
+- Admin pending درخواستیں منظور یا مسترد کر سکتا ہے، اور فعال Customer/Seller اکاؤنٹ Suspend یا دوبارہ فعال کر سکتا ہے۔
+
+## 8) ابتدائی محفوظ ٹیسٹ
 
 - Home page اردو اور English دونوں میں کھلتا ہے۔
 - `/register` پر test customer بنائیں؛ status `pending` ہونا چاہیے۔
@@ -72,11 +80,11 @@ return [
 - Mobile اور desktop دونوں پر layout دیکھیں۔
 - Browser میں PHP errors یا database credentials ظاہر نہیں ہونے چاہئیں۔
 
-## 8) ابھی کیا کام نہیں کرتا
+## 9) ابھی کیا کام نہیں کرتا
 
 Database میں products/orders کے tables موجود ہونے کا مطلب یہ نہیں کہ ان کے مکمل صفحات یا workflows بن چکے ہیں۔ موجودہ product cards demo data ہیں، cart demo-only ہے، اور checkout، حقیقی order placement، seller management اور payment verification ابھی مکمل نہیں۔ اس ورژن پر حقیقی customers سے ادائیگی یا live orders نہ لیں۔
 
-## 9) اپ لوڈ سے پہلے حفاظتی فہرست
+## 10) اپ لوڈ سے پہلے حفاظتی فہرست
 
 - HTTPS/SSL فعال کریں۔
 - `config/database.local.php` کے credentials نجی رکھیں۔
