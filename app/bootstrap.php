@@ -23,7 +23,10 @@ date_default_timezone_set('Asia/Karachi');
 $sessionNow = time();
 if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
     $lastActivity = (int)($_SESSION['last_activity'] ?? 0);
-    if ($lastActivity > 0 && ($sessionNow - $lastActivity) >= 86400) {
+    $authStarted = (int)($_SESSION['auth_started_at'] ?? 0);
+    $idleExpired = $lastActivity > 0 && ($sessionNow - $lastActivity) >= 86400;
+    $absoluteExpired = $authStarted > 0 && ($sessionNow - $authStarted) >= 86400;
+    if ($idleExpired || $absoluteExpired) {
         $_SESSION = [];
         session_regenerate_id(true);
         $_SESSION['_flash']['notice'] = 'سکیورٹی کی خاطر آپ کا سیشن 24 گھنٹے کی غیر فعالیت کے بعد ختم ہوگیا۔ دوبارہ Login کریں۔';
