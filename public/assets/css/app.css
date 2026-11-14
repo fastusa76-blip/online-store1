@@ -83,3 +83,8 @@ input,button,select,textarea{font:inherit;max-width:100%}
   .photo{height:190px}
   .header nav a{font-size:10px;padding:5px 6px}
 }
+
+.home-account-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.home-account-links a{display:inline-flex;align-items:center;min-height:40px;padding:8px 13px;border:1px solid #ffffff80;border-radius:10px;color:#fff;font-size:12px;font-weight:800}
+.auth-brand{min-width:0}
+@media(max-width:480px){.home-account-links{gap:7px}.home-account-links a{font-size:11px;padding:7px 10px}}
