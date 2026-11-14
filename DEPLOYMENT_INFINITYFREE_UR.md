@@ -56,11 +56,22 @@ return [
 
 یہ صرف نمونہ ہے۔ اصل credentials اپنی hosting سے لیں۔ یہ فائل کسی کو نہ بھیجیں اور GitHub پر upload نہ کریں۔
 
-## 6) ابتدائی Admin اکاؤنٹ — موجودہ رکاوٹ
+## 6) پہلا Admin اکاؤنٹ بنائیں — One-time setup
 
-موجودہ `scripts/create-admin.php` صرف PHP CLI سے چلتا ہے۔ Free shared hosting پر SSH/PHP CLI دستیاب نہ بھی ہو۔ اس لیے پہلے control panel میں دیکھیں کہ SSH/CLI دستیاب ہے یا نہیں۔ اگر نہیں، تو Admin بنانے کا محفوظ متبادل (مثلاً محدود مدت کا one-time setup طریقہ) کوڈ میں شامل کیے بغیر public site پر Admin dashboard استعمال نہیں ہو سکے گا۔
+اب shared hosting کے لیے محدود اور ایک بار استعمال ہونے والا setup راستہ شامل ہے:
 
-**کبھی بھی** `create-admin.php` کو browser سے چلانے کے لیے اس کی CLI protection نہ ہٹائیں، اور نہ ہی کوئی مستقل public admin-creation URL کھلا چھوڑیں۔
+1. Hosting File Manager میں `config/admin-setup.example.php` کی copy بنائیں۔
+2. copy کا نام `admin-setup.local.php` رکھیں۔
+3. فائل میں placeholder کی جگہ اپنا نیا، خفیہ random secret (کم از کم 32 حروف) لکھیں۔ مثال کے طور پر فائل کا آخری حصہ یوں ہوگا:
+   `return hash('sha256', 'یہاں اپنا نیا لمبا اور خفیہ secret لکھیں');`
+4. اسی secret کو نجی رکھیں؛ GitHub یا کسی شخص کو نہ بھیجیں۔
+5. براؤزر میں اپنی ویب سائٹ کا `/admin/setup` صفحہ کھولیں۔ Secret، Admin نام، Email اور کم از کم 12 حروف کا مضبوط Password درج کریں۔
+6. کامیابی کے بعد setup فائل خود حذف کرنے کی کوشش ہوگی، اور ڈیٹابیس میں Admin پہلے سے موجود ہونے کی وجہ سے setup صفحہ دوبارہ کام نہیں کرے گا۔
+7. پھر `/login` پر Admin Email اور Password سے Login کریں۔ Admin Control Panel `/admin/dashboard` پر ہے۔
+
+اگر ہوسٹنگ فائل حذف کرنے کی اجازت نہ دے تو بھی database میں Admin موجود ہونے کی وجہ سے setup route بند رہے گا؛ پھر بھی File Manager سے `admin-setup.local.php` خود حذف کردیں۔
+
+**اہم:** `admin-setup.local.php` کبھی GitHub پر upload نہ کریں۔ `scripts/create-admin.php` کی CLI protection بھی نہ ہٹائیں اور کوئی مستقل public admin-creation URL نہ بنائیں۔
 
 ## 7) Login، Dashboard اور 24 گھنٹے کا سیشن
 
