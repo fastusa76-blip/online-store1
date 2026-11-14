@@ -18,11 +18,22 @@ if ($route==='admin/login') $route='admin-login';
 if ($route==='admin/dashboard') $route='admin-dashboard';
 if ($route==='admin/action') $route='admin-action';
 if ($route==='activate') $route='activate';
+if (in_array($route,['ur/account','en/account','account'],true)) $route='account-dashboard';
+if ($route==='admin/user-action') $route='admin-user-action';
 function auth_page(string $title,string $body): never {
  echo '<!doctype html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'.h($title).' — Hammad Online Store</title><style>body{margin:0;background:#f7f4fb;color:#241b31;font:16px Arial,sans-serif}.wrap{max-width:560px;margin:45px auto;padding:28px;background:#fff;border:1px solid #eee6f7;border-radius:18px;box-shadow:0 12px 40px #27133b10}h1{color:#5b21b6;font-size:25px}label{display:block;margin:14px 0 6px;font-weight:bold}input,select{width:100%;padding:12px;border:1px solid #ddd3ea;border-radius:9px;box-sizing:border-box;font-size:15px}button,.btn{display:inline-block;background:#6d28d9;color:white;border:0;border-radius:9px;padding:12px 18px;margin-top:16px;text-decoration:none;cursor:pointer;font-weight:bold}.muted{color:#71677d;font-size:13px;line-height:1.8}.alert{padding:12px;border-radius:9px;background:#fff3d9;margin:12px 0}.ok{background:#e7f8ed}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}.table{width:100%;border-collapse:collapse;font-size:13px}.table td,.table th{border-bottom:1px solid #eee;padding:10px;text-align:right}.danger{background:#b42318}.ltr{direction:ltr;text-align:left}a{color:#5b21b6}</style></head><body><main class="wrap"><a href="/ur/">← Hammad Online Store</a><h1>'.h($title).'</h1>'.$body.'</main></body></html>'; exit;
 }
 function csrf_field(): string { return '<input type="hidden" name="_csrf" value="'.h(hammad_csrf_token()).'">'; }
-if ($route==='logout') { $_SESSION=[]; session_regenerate_id(true); store_flash('notice','آپ کامیابی سے Logout ہوگئے ہیں۔'); store_redirect('/login'); }
+if ($route==='logout') {
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], (bool)$params['secure'], (bool)$params['httponly']);
+    }
+    session_regenerate_id(true);
+    store_flash('notice', 'آپ کامیابی سے Logout ہوگئے ہیں۔');
+    store_redirect('/login');
+}
 if ($route==='register' && $_SERVER['REQUEST_METHOD']==='POST') {
  if(!hammad_verify_csrf($_POST['_csrf']??null)) {store_flash('error','درخواست کی تصدیق ناکام ہوئی، دوبارہ کوشش کریں۔');store_redirect('/register');}
  $name=trim((string)($_POST['name']??''));$email=strtolower(trim((string)($_POST['email']??'')));$phone=store_normalize_phone((string)($_POST['phone']??''));$password=(string)($_POST['password']??'');$role=($_POST['role']??'customer')==='seller'?'seller':'customer';
@@ -42,7 +53,7 @@ if ($route==='login' && $_SERVER['REQUEST_METHOD']==='POST') {
  if(!$u||empty($u['password_hash'])||!password_verify($password,$u['password_hash'])){store_flash('error','Gmail / موبائل یا پاس ورڈ درست نہیں۔');store_redirect('/login');}
  if($u['status']==='pending'){store_flash('error','آپ کی درخواست ابھی Admin کی منظوری کے انتظار میں ہے۔');store_redirect('/login');}
  if($u['status']!=='active'){store_flash('error','یہ اکاؤنٹ فعال نہیں ہے۔ Admin سے رابطہ کریں۔');store_redirect('/login');}
- store_login_user($u);store_log($db,(int)$u['id'],'login','user',(int)$u['id']);store_redirect($u['role']==='admin'?'/admin/dashboard':'/ur/');
+ store_login_user($u);store_log($db,(int)$u['id'],'login','user',(int)$u['id']);store_redirect($u['role']==='admin'?'/admin/dashboard':'/ur/account');
  }catch(Throwable $e){error_log($e->getMessage());store_flash('error','Login سروس دستیاب نہیں۔ Database setup چیک کریں۔');store_redirect('/login');}
 }
 if ($route==='login') { $err=store_flash('error');$notice=store_flash('notice');auth_page('Login',''.($err?'<div class="alert">'.h($err).'</div>':'').($notice?'<div class="alert ok">'.h($notice).'</div>':'').'<form method="post">'.csrf_field().'<label>Gmail یا WhatsApp موبائل نمبر</label><input class="ltr" name="identifier" required autocomplete="username"><label>پاس ورڈ</label><input type="password" name="password" required autocomplete="current-password"><button>Login کریں</button></form><p>نیا اکاؤنٹ؟ <a href="/register">رجسٹریشن کریں</a></p>');}
@@ -54,10 +65,56 @@ if ($route==='activate') {
 }
 if ($route==='admin-login') store_redirect('/login');
 if ($route==='admin-dashboard') {
- store_require_admin();$db=store_db();$rows=$db->query("SELECT id,name,email,phone,role,created_at FROM users WHERE status='pending' ORDER BY created_at ASC")->fetchAll();$flash=store_flash('notice');$link=store_flash('activation_url');$wa=store_flash('wa_url');
- $body=($flash?'<div class="alert ok">'.h($flash).'</div>':'').($link?'<div class="alert"><b>Activation Link (صرف ایک مرتبہ دکھایا جاتا ہے):</b><p class="ltr">'.h($link).'</p><button data-link="'.h($link).'" onclick="navigator.clipboard.writeText(this.dataset.link)">لنک Copy کریں</button><p><a target="_blank" rel="noopener" href="'.h($wa).'">WhatsApp پر پیغام کھولیں</a></p></div>':'').'<p>Pending درخواستیں: '.count($rows).'</p><table class="table"><tr><th>نام / ای میل</th><th>WhatsApp</th><th>قسم</th><th>عمل</th></tr>';
- foreach($rows as $r){$body.='<tr><td>'.h($r['name']).'<br>'.h($r['email']).'</td><td class="ltr">'.h($r['phone']).'</td><td>'.h($r['role']).'</td><td><form method="post" action="/admin/action">'.csrf_field().'<input type="hidden" name="user_id" value="'.(int)$r['id'].'"><button name="decision" value="approve">Approve</button><button class="danger" name="decision" value="reject">Reject</button></form></td></tr>';}
- $body.='</table><p><a href="/logout">Logout</a></p>';auth_page('Admin Dashboard',$body);
+ store_require_admin();
+ $db=store_db();
+ $pending=(int)$db->query("SELECT COUNT(*) FROM users WHERE status='pending'")->fetchColumn();
+ $active=(int)$db->query("SELECT COUNT(*) FROM users WHERE status='active' AND role<>'admin'")->fetchColumn();
+ $sellers=(int)$db->query("SELECT COUNT(*) FROM users WHERE role='seller'")->fetchColumn();
+ $total=(int)$db->query("SELECT COUNT(*) FROM users WHERE role<>'admin'")->fetchColumn();
+ $rows=$db->query("SELECT id,name,email,phone,role,status,created_at FROM users WHERE role<>'admin' ORDER BY FIELD(status,'pending','approved','active','suspended','rejected'),created_at DESC LIMIT 100")->fetchAll();
+ $flash=store_flash('notice');$link=store_flash('activation_url');$wa=store_flash('wa_url');
+ $body=($flash?'<div class="alert ok">'.h($flash).'</div>':'')
+ .($link?'<div class="alert"><b>Activation Link (صرف ایک مرتبہ دکھایا جاتا ہے):</b><p class="ltr">'.h($link).'</p><button type="button" data-link="'.h($link).'" onclick="navigator.clipboard.writeText(this.dataset.link)">لنک Copy کریں</button><p><a target="_blank" rel="noopener" href="'.h($wa).'">WhatsApp پر پیغام کھولیں</a></p></div>':'')
+ .'<div class="row"><div class="alert"><b>کل صارفین</b><h2>'.$total.'</h2></div><div class="alert"><b>فعال صارفین</b><h2>'.$active.'</h2></div><div class="alert"><b>منظوری کے منتظر</b><h2>'.$pending.'</h2></div><div class="alert"><b>Seller اکاؤنٹس</b><h2>'.$sellers.'</h2></div></div>'
+ .'<h2>صارفین کا کنٹرول پینل</h2><p class="muted">یہاں آپ رجسٹریشن، اکاؤنٹ کی حالت اور Seller/Customer کی معلومات دیکھ سکتے ہیں۔ Admin اکاؤنٹ اس فہرست میں شامل نہیں۔</p>'
+ .'<div style="overflow-x:auto"><table class="table"><tr><th>ID</th><th>نام / ای میل</th><th>موبائل</th><th>قسم</th><th>حالت</th><th>عمل</th></tr>';
+ foreach($rows as $r){
+   $body.='<tr><td>'.(int)$r['id'].'</td><td>'.h($r['name']).'<br>'.h($r['email']).'</td><td class="ltr">'.h((string)$r['phone']).'</td><td>'.h($r['role']).'</td><td>'.h($r['status']).'</td><td>';
+   if($r['status']==='pending'){
+     $body.='<form method="post" action="/admin/action">'.csrf_field().'<input type="hidden" name="user_id" value="'.(int)$r['id'].'"><button name="decision" value="approve">Approve</button><button class="danger" name="decision" value="reject">Reject</button></form>';
+   } elseif(in_array($r['status'],['active','suspended'],true)){
+     $next=$r['status']==='active'?'suspended':'active';
+     $label=$next==='suspended'?'Suspend':'Activate';
+     $body.='<form method="post" action="/admin/user-action">'.csrf_field().'<input type="hidden" name="user_id" value="'.(int)$r['id'].'"><input type="hidden" name="status" value="'.$next.'"><button class="'.($next==='suspended'?'danger':'').'" name="save" value="1">'.$label.'</button></form>';
+   } else {$body.='<span class="muted">کوئی عمل دستیاب نہیں</span>';}
+   $body.='</td></tr>';
+ }
+ $body.='</table></div><p><a href="/logout">Logout</a></p>';
+ auth_page('Admin Control Panel',$body);
+}
+if ($route==='admin-user-action' && $_SERVER['REQUEST_METHOD']==='POST') {
+ store_require_admin();
+ if(!hammad_verify_csrf($_POST['_csrf']??null)) auth_page('Security Error','<p>CSRF verification failed.</p>');
+ $id=(int)($_POST['user_id']??0);$status=(string)($_POST['status']??'');
+ if(!in_array($status,['active','suspended'],true)){store_flash('notice','درخواست درست نہیں۔');store_redirect('/admin/dashboard');}
+ $db=store_db();
+ $q=$db->prepare("SELECT id,role,status FROM users WHERE id=? AND role IN ('customer','seller') LIMIT 1");$q->execute([$id]);$target=$q->fetch();
+ if(!$target || !in_array($target['status'],['active','suspended'],true)){store_flash('notice','صارف موجود نہیں یا اس کی حالت تبدیل نہیں کی جاسکتی۔');store_redirect('/admin/dashboard');}
+ $db->prepare('UPDATE users SET status=? WHERE id=?')->execute([$status,$id]);
+ store_log($db,(int)hammad_current_user()['id'],'user_status_changed','user',$id,['from'=>$target['status'],'to'=>$status]);
+ store_flash('notice',$status==='suspended'?'صارف کا اکاؤنٹ Suspend کردیا گیا۔':'صارف کا اکاؤنٹ دوبارہ فعال کردیا گیا۔');
+ store_redirect('/admin/dashboard');
+}
+if ($route==='account-dashboard') {
+ $user=store_require_customer();
+ $db=store_db();$q=$db->prepare('SELECT name,email,phone,role,status,created_at FROM users WHERE id=? LIMIT 1');$q->execute([$user['id']]);$profile=$q->fetch();
+ if(!$profile || $profile['status']!=='active'){$_SESSION=[];session_regenerate_id(true);store_redirect('/login');}
+ $joined=date('d M Y',strtotime($profile['created_at']));
+ $body='<div class="alert ok">خوش آمدید، '.h($profile['name']).'! آپ کامیابی سے Login ہیں۔</div>'
+ .'<h2>آپ کا اکاؤنٹ</h2><table class="table"><tr><th>نام</th><td>'.h($profile['name']).'</td></tr><tr><th>Email</th><td class="ltr">'.h($profile['email']).'</td></tr><tr><th>موبائل</th><td class="ltr">'.h((string)$profile['phone']).'</td></tr><tr><th>اکاؤنٹ کی قسم</th><td>'.h($profile['role']).'</td></tr><tr><th>حالت</th><td>'.h($profile['status']).'</td></tr><tr><th>رجسٹریشن</th><td>'.$joined.'</td></tr></table>'
+ .'<p class="muted">سکیورٹی کے لیے 24 گھنٹے کی غیر فعالیت کے بعد آپ خودکار طور پر Logout ہوجائیں گے۔ Logout بٹن سے آپ فوراً سیشن ختم کرسکتے ہیں۔</p>'
+ .'<div class="row"><a class="btn" href="/ur/">Store پر واپس جائیں</a><a class="btn" href="/logout">Logout</a></div>';
+ auth_page('Customer Dashboard',$body);
 }
 if ($route==='admin-action' && $_SERVER['REQUEST_METHOD']==='POST') {
  store_require_admin();if(!hammad_verify_csrf($_POST['_csrf']??null))auth_page('Security Error','<p>CSRF verification failed.</p>');
