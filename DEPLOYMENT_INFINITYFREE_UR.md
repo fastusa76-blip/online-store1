@@ -33,12 +33,13 @@ SEO کی ابتدائی فائلیں بھی ویب روٹ میں اپلوڈ کر
 - `robots.txt`
 - `sitemap.xml`
 - `public/assets/images/favicon.svg`
+- `public/assets/images/favicon.png` (96×96 PNG، Google Search کے لیے)
 
 یہ فائلیں موجودہ اردو اور انگریزی ہوم پیجز کے لیے canonical URLs، hreflang، Open Graph اور OnlineStore JSON-LD شامل کرتی ہیں۔ Sitemap فی الحال صرف `/ur/` اور `/en/` کو شامل کرتا ہے کیونکہ حقیقی database-backed product/category pages ابھی تیار نہیں۔ جب اصل catalog مکمل ہوگا تو sitemap کو database سے خودکار بنائیں گے۔
 
 Google Search Console میں URL-prefix property `https://hammadonlinestor.xo.je/` شامل کریں۔ Google کی طرف سے ملنے والا اصل HTML verification tag یا فائل ہی استعمال کریں؛ کوئی فرضی token نہ بنائیں۔ پھر `sitemap.xml` submit کریں۔ مکمل رہنمائی `GOOGLE_SEARCH_CONSOLE_SEO_UR.md` میں ہے۔
 
-HTTPS/SSL فعال ہونے اور بغیر certificate warning کے کام کرنے کی تصدیق کے بعد ہی HTTPS canonical URLs استعمال کریں۔ Search Console میں favicon دکھنے کی ضمانت نہیں ہوتی؛ Google کی موجودہ دستاویزات PNG/ICO سمیت مخصوص formats بتاتی ہیں، اس لیے حتمی لوگو کے ساتھ 48×48 یا اس سے بڑا PNG/ICO بھی شامل کرنا باقی ہے۔
+HTTPS/SSL فعال ہونے اور بغیر certificate warning کے کام کرنے کی تصدیق کے بعد ہی HTTPS canonical URLs استعمال کریں۔ Search Console میں favicon دکھنے کی ضمانت نہیں ہوتی؛ Google کی موجودہ دستاویزات میں PNG supported ہے؛ 96×96 PNG favicon اب repository میں شامل ہے۔ Google Search میں دکھنے کی ضمانت نہیں۔
 
 ## 3) PHP ورژن اور ضروری extensions
 
