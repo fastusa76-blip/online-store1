@@ -7,7 +7,7 @@ Bilingual Urdu/English multi-vendor marketplace for Pakistan.
 
 ## Current status — do not treat as a complete store yet
 
-The current branch is a foundation / registration prototype. It includes the responsive demo storefront, bilingual resources, database schema, customer/seller registration, login, pending approval, admin approval routes, one-time activation tokens, and manual WhatsApp click-to-chat.
+The current branch includes a responsive demo storefront, bilingual resources, customer/seller registration, login, pending approval, one-time activation, an admin user-control panel, a customer account page, and manual WhatsApp click-to-chat. Authenticated logins expire after 24 hours (absolute maximum) and after 24 hours of inactivity.
 
 The following are **not implemented as working store features yet**: database-backed product/catalog management, real search/filtering, persistent cart, checkout, order placement and tracking, seller dashboard/product management, payment verification, commissions/payouts, shipping/returns, and reviews. Product cards are illustrative demo data. Cart buttons are demo-only.
 
@@ -32,7 +32,7 @@ The current prototype uses original SVG placeholders, not downloaded brand photo
 
 1. Import the updated `database/schema.sql` into a new MySQL database. If an older schema was already imported, back it up and apply a reviewed migration; do not blindly re-import over live data.
 2. Copy `config/database.example.php` to `config/database.local.php` and enter the database credentials.
-3. The first-admin helper `scripts/create-admin.php` is CLI-only. Many free shared hosts do not provide PHP CLI/SSH, so verify host support before relying on it. Never expose the script as a public web page.
+3. The first-admin helper `scripts/create-admin.php` is CLI-only. For shared hosting without CLI, copy `config/admin-setup.example.php` to `config/admin-setup.local.php`, replace the placeholder with a private random secret, then use `/admin/setup` once. The setup route is disabled after an admin exists. Delete the local secret file after setup and never commit it.
 4. New customer/seller accounts are created as `pending`; pending users cannot sign in.
 5. An administrator can approve/reject applications. Approval creates a one-use activation URL valid for 72 hours. The admin must review and manually send the WhatsApp click-to-chat message.
 6. Use HTTPS. Activation links are sensitive and must never be shared publicly.
@@ -43,4 +43,4 @@ PHP syntax lint has passed in GitHub Actions for the current foundation commit. 
 
 ## Planned next phases
 
-Database-backed catalog and category filters; persistent cart and checkout; multi-seller orders; seller center; full admin panel; payment verification; commissions and payouts; shipping, returns and reviews; Google OAuth; security and deployment tests.
+Database-backed catalog and category filters; persistent cart and checkout; multi-seller orders; seller center and seller-specific tools; full product/order/payment administration; payment verification; commissions and payouts; shipping, returns and reviews; Google OAuth; security and deployment tests.
