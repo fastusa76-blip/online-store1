@@ -8,7 +8,8 @@ Canonical website hostname selected by the owner:
 - `robots.txt`: allows public crawling, disallows private account/admin/activation routes, and references the sitemap.
 - `sitemap.xml`: lists only the currently implemented public Urdu and English home pages.
 - `index.php`: adds language-specific canonical URLs, Urdu/English hreflang, meta description, Open Graph fields, favicon reference and basic OnlineStore JSON-LD.
-- `public/assets/images/favicon.svg`: browser favicon (temporary brand mark; replace with final approved brand artwork without changing the URL if possible).
+- `public/assets/images/favicon.png`: 96×96 PNG favicon for Google Search compatibility.
+- `public/assets/images/favicon.svg`: scalable browser favicon (temporary brand mark; replace with final approved brand artwork without changing the URLs if possible).
 
 The sitemap is intentionally limited to public pages that currently exist. Do not add demo product URLs or account/admin pages. When real category and product pages are implemented, generate the sitemap dynamically from published database records.
 
@@ -38,7 +39,7 @@ The sitemap is intentionally limited to public pages that currently exist. Do no
 
 - Sitemap submission is a hint, not a guarantee of indexing or ranking.
 - Google may take days or weeks to recrawl the homepage and favicon.
-- Search-result favicon display is not guaranteed. Google's current favicon documentation lists supported formats (BMP, GIF, ICO, PNG, JPEG, PPM, TIFF); for strongest compatibility, add a square PNG or ICO at least 48×48px and link it with `rel="icon"`. The current SVG can remain for browsers but should not be the only favicon format if Google Search favicon eligibility is important.
+- Search-result favicon display is not guaranteed. Google's current favicon documentation lists supported formats (BMP, GIF, ICO, PNG, JPEG, PPM, TIFF). A square 96×96 PNG has been added and linked with `rel="icon"`; the scalable SVG remains as an additional browser favicon. Google Search display is not guaranteed.
 - The current face-based final logo has not yet been supplied/approved for the website asset. The present SVG is a temporary H monogram.
 - Do not add a Google Analytics ID, Google OAuth Client ID, Search Console verification token, database password or other secret to public GitHub files.
 - Google Sign-in is not implemented yet and remains a future optional feature.
