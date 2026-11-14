@@ -1,19 +1,18 @@
 # Hammad Online Store — Brand image folder
 
-Upload approved brand assets into this folder.
+## Upload these two generated image files
+1. `hammad-online-store-logo.jpg` — compact round portrait for the website header and browser tab.
+2. `hammad-founder-photo.jpg` — larger founder portrait for the homepage hero banner.
 
-## Required final logo
-- Filename: hammad-online-store-logo.png
-- Recommended: transparent PNG, square 1024 x 1024 px, sRGB.
-- Also add: hammad-online-store-logo.webp (optional optimized version).
-- This file will be used in the website header, footer, social preview and structured data after integration.
+Both files are prepared from the portrait already visible in the reference screenshot you supplied. They are crops from that screenshot, not a separately uploaded original photograph; a higher-resolution original can replace them later.
 
-## Founder portrait source
-- Filename: hammad-founder-photo.jpg (optional; only if the owner wants a portrait displayed on the site).
-- Keep the original privately until the owner approves its use.
-- Do not expose private source photos publicly unless intended.
+## Exact destination
+`public/assets/images/brand/`
 
-## Upload path
-GitHub repository > public > assets > images > brand > Add file > Upload files.
+## Upload steps
+1. Open this folder on GitHub.
+2. Choose **Add file → Upload files**.
+3. Upload both files without renaming them.
+4. Select **Commit changes** on branch `feature/phase-1-foundation`.
 
-Do not upload passwords, OAuth secrets, identity documents or private customer photos here.
+The homepage and header already reference these exact filenames. The logo is also used as the browser tab icon. Do not upload passwords, OAuth secrets, identity documents, or private customer photos here.
