@@ -20,6 +20,10 @@ Google Sign-in is **not implemented or active in this foundation**, but it is in
 From the repository directory run: `php -S 127.0.0.1:8000`
 Open `/ur/` or `/en/`. PHP's built-in server is for local development only.
 
+## Production URL and SEO foundation
+
+Selected free-hosting subdomain: `https://hammadonlinestor.xo.je` (enable and verify SSL before launch). The current branch includes a bilingual homepage sitemap, robots rules, language-specific canonical/hreflang metadata, Open Graph metadata, basic OnlineStore JSON-LD, and 96×96 PNG plus SVG favicon assets. The sitemap currently lists only the Urdu and English home pages; database-driven product/category URLs must be added after those public pages are implemented. See [Google Search Console and SEO guide](GOOGLE_SEARCH_CONSOLE_SEO_UR.md).
+
 ## Database
 
 Import `database/schema.sql` into a new MySQL database. Copy `config/database.example.php` to `config/database.local.php` on the server and set credentials. Never commit real credentials. See [InfinityFree deployment guide](DEPLOYMENT_INFINITYFREE_UR.md).
