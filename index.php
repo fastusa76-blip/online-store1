@@ -20,6 +20,7 @@ if ($route==='admin/action') $route='admin-action';
 if ($route==='activate') $route='activate';
 if (in_array($route,['ur/account','en/account','account'],true)) $route='account-dashboard';
 if ($route==='admin/user-action') $route='admin-user-action';
+if ($route==='admin/setup') $route='admin-setup';
 function auth_page(string $title,string $body): never {
  echo '<!doctype html><html lang="ur" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'.h($title).' — Hammad Online Store</title><style>body{margin:0;background:#f7f4fb;color:#241b31;font:16px Arial,sans-serif}.wrap{max-width:560px;margin:45px auto;padding:28px;background:#fff;border:1px solid #eee6f7;border-radius:18px;box-shadow:0 12px 40px #27133b10}h1{color:#5b21b6;font-size:25px}label{display:block;margin:14px 0 6px;font-weight:bold}input,select{width:100%;padding:12px;border:1px solid #ddd3ea;border-radius:9px;box-sizing:border-box;font-size:15px}button,.btn{display:inline-block;background:#6d28d9;color:white;border:0;border-radius:9px;padding:12px 18px;margin-top:16px;text-decoration:none;cursor:pointer;font-weight:bold}.muted{color:#71677d;font-size:13px;line-height:1.8}.alert{padding:12px;border-radius:9px;background:#fff3d9;margin:12px 0}.ok{background:#e7f8ed}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}.table{width:100%;border-collapse:collapse;font-size:13px}.table td,.table th{border-bottom:1px solid #eee;padding:10px;text-align:right}.danger{background:#b42318}.ltr{direction:ltr;text-align:left}a{color:#5b21b6}</style></head><body><main class="wrap"><a href="/ur/">← Hammad Online Store</a><h1>'.h($title).'</h1>'.$body.'</main></body></html>'; exit;
 }
@@ -62,6 +63,38 @@ if ($route==='activate') {
  try{$db=store_db();$q=$db->prepare("SELECT t.id token_id,u.id user_id,u.status FROM activation_tokens t JOIN users u ON u.id=t.user_id WHERE t.token_hash=? AND t.used_at IS NULL AND t.expires_at>UTC_TIMESTAMP() AND u.status='approved' LIMIT 1");$q->execute([hash('sha256',$token)]);$r=$q->fetch();if(!$r)auth_page('لنک ختم یا استعمال ہوچکا','<p>یہ Activation Link expire یا پہلے استعمال ہوچکا ہے۔ Admin سے نیا لنک لیں۔</p>');
  $db->beginTransaction();$db->prepare("UPDATE users SET status='active' WHERE id=? AND status='approved'")->execute([$r['user_id']]);$db->prepare('UPDATE activation_tokens SET used_at=UTC_TIMESTAMP() WHERE id=?')->execute([$r['token_id']]);$db->commit();auth_page('اکاؤنٹ فعال ہوگیا','<div class="alert ok">آپ کا اکاؤنٹ کامیابی سے فعال ہوگیا۔</div><a class="btn" href="/login">اب Login کریں</a>');
  }catch(Throwable $e){if(isset($db)&&$db->inTransaction())$db->rollBack();error_log($e->getMessage());auth_page('مسئلہ','<p>Activation مکمل نہیں ہوسکی۔ Admin سے رابطہ کریں۔</p>');}
+}
+if ($route==='admin-setup') {
+ $db=store_db();
+ $adminCount=(int)$db->query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn();
+ if($adminCount>0) auth_page('Setup بند ہے','<div class="alert ok">پہلا Admin اکاؤنٹ پہلے ہی بن چکا ہے۔ سکیورٹی کے لیے یہ صفحہ بند کردیا گیا ہے۔</div><a class="btn" href="/login">Admin Login</a>');
+ $secretFile=APP_ROOT.'/config/admin-setup.local.php';
+ if(!is_file($secretFile)) auth_page('Admin Setup تیار نہیں','<p>Hosting کے config فولڈر میں admin-setup.local.php فائل بنائیں اور اس میں Setup Secret کا SHA-256 hash محفوظ کریں۔ تفصیل Deployment Guide میں موجود ہے۔</p>');
+ $storedHash=require $secretFile;
+ if(!is_string($storedHash)||!preg_match('/^[a-f0-9]{64}$/',$storedHash)) auth_page('Setup Configuration Error','<p>Setup secret hash درست نہیں۔ فائل کی configuration چیک کریں۔</p>');
+ if($_SERVER['REQUEST_METHOD']==='POST'){
+   if(!hammad_verify_csrf($_POST['_csrf']??null)) auth_page('Security Error','<p>درخواست کی تصدیق ناکام ہوئی۔ دوبارہ کوشش کریں۔</p>');
+   $secret=(string)($_POST['setup_secret']??'');$name=trim((string)($_POST['name']??''));$email=strtolower(trim((string)($_POST['email']??'')));$password=(string)($_POST['password']??'');
+   if(!hash_equals($storedHash,hash('sha256',$secret))) auth_page('Setup Secret غلط ہے','<p>درج کیا گیا secret درست نہیں۔</p>');
+   if($name===''||!filter_var($email,FILTER_VALIDATE_EMAIL)||strlen($password)<12) auth_page('معلومات نامکمل ہیں','<p>نام، درست Email اور کم از کم 12 حروف کا مضبوط Password درج کریں۔</p>');
+   try{
+     $db->beginTransaction();
+     $check=(int)$db->query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn();
+     if($check>0) throw new RuntimeException('Admin account already exists.');
+     $q=$db->prepare("INSERT INTO users(role,name,email,phone,password_hash,status,approved_at) VALUES('admin',?,?,NULL,?,'active',UTC_TIMESTAMP())");
+     $q->execute([$name,$email,password_hash($password,PASSWORD_DEFAULT)]);
+     $newId=(int)$db->lastInsertId();store_log($db,null,'first_admin_created','user',$newId);
+     $db->commit();
+     @unlink($secretFile);
+     auth_page('Admin اکاؤنٹ تیار ہوگیا','<div class="alert ok">پہلا Admin اکاؤنٹ کامیابی سے بن گیا۔ اب Setup صفحہ بند ہے۔</div><a class="btn" href="/login">Admin Login کریں</a>');
+   }catch(Throwable $e){
+     if($db->inTransaction())$db->rollBack();
+     error_log($e->getMessage());
+     auth_page('Admin Setup ناکام','<p>اکاؤنٹ نہیں بن سکا۔ Email پہلے سے موجود ہو سکتی ہے یا database میں مسئلہ ہے۔</p>');
+   }
+ }
+ $body='<p class="muted">یہ ایک بار استعمال ہونے والا Admin setup ہے۔ اکاؤنٹ بننے کے بعد یہ صفحہ خود بند ہوجائے گا۔</p><form method="post">'.csrf_field().'<label>One-time Setup Secret</label><input class="ltr" type="password" name="setup_secret" required autocomplete="off"><label>Admin کا نام</label><input name="name" maxlength="120" required><label>Admin Email</label><input class="ltr" type="email" name="email" required><label>مضبوط Password (کم از کم 12 حروف)</label><input type="password" name="password" minlength="12" required autocomplete="new-password"><button type="submit">پہلا Admin بنائیں</button></form>';
+ auth_page('First Admin Setup',$body);
 }
 if ($route==='admin-login') store_redirect('/login');
 if ($route==='admin-dashboard') {
