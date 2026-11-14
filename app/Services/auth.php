@@ -46,6 +46,7 @@ function store_login_user(array $user): void {
         'role' => $user['role'],
     ];
     $_SESSION['last_activity'] = time();
+    $_SESSION['auth_started_at'] = time();
     $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
     setcookie(session_name(), session_id(), [
         'expires' => time() + 86400,
